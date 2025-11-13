@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Mail, Lock, User, Phone, Eye, EyeOff, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { authAPI } from '../services/api'; // ✅ استيراد من api.js
+import { authAPI } from '../services/api';
 
 export default function RegisterPage() {
   const { language } = useLanguage();
@@ -33,20 +33,53 @@ export default function RegisterPage() {
     
     setLoading(true);
     try {
-      const response = await authAPI.register({ // ✅ استخدام authAPI
+      // ⭐ طباعة البيانات المرسلة للتأكد
+      console.log('📤 Sending registration data:', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone
+      });
+
+      const response = await authAPI.register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         phone: formData.phone
       });
 
-      if (response.data.success) {
-        toast.success(language === 'ar' ? 'تم إرسال كود التحقق! 📧' : 'Verification code sent! 📧');
-        navigate('/verify-email', { state: { email: formData.email } });
+      // ⭐ طباعة الـ response للفحص
+      console.log('✅ Registration response:', response.data);
+      console.log('📊 Response status:', response.status);
+
+      // ⭐ التحقق بطرق متعددة (أكثر مرونة)
+      if (response.data.success || response.status === 200 || response.status === 201) {
+        toast.success(
+          language === 'ar' 
+            ? '🎉 تم التسجيل بنجاح! تحقق من بريدك الإلكتروني' 
+            : '🎉 Registration successful! Check your email'
+        );
+        
+        // ⭐ انتظار قصير قبل التحويل للتأكد من ظهور الـ toast
+        setTimeout(() => {
+          console.log('🔄 Navigating to verify-email page...');
+          navigate('/verify-email', { 
+            state: { email: formData.email },
+            replace: true 
+          });
+        }, 1500);
+      } else {
+        // في حالة عدم وجود success flag
+        throw new Error('Unexpected response format');
       }
     } catch (error) {
-      console.error('Register error:', error);
-      toast.error(error.response?.data?.message || (language === 'ar' ? 'فشل التسجيل' : 'Registration failed'));
+      console.error('❌ Register error:', error);
+      console.error('📋 Error response:', error.response?.data);
+      console.error('🔢 Error status:', error.response?.status);
+      
+      toast.error(
+        error.response?.data?.message || 
+        (language === 'ar' ? 'فشل التسجيل. حاول مرة أخرى' : 'Registration failed. Try again')
+      );
     } finally {
       setLoading(false);
     }

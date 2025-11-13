@@ -33,13 +33,6 @@ export default function RegisterPage() {
     
     setLoading(true);
     try {
-      // ⭐ طباعة البيانات المرسلة للتأكد
-      console.log('📤 Sending registration data:', {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone
-      });
-
       const response = await authAPI.register({
         name: formData.name,
         email: formData.email,
@@ -47,34 +40,19 @@ export default function RegisterPage() {
         phone: formData.phone
       });
 
-      // ⭐ طباعة الـ response للفحص
-      console.log('✅ Registration response:', response.data);
-      console.log('📊 Response status:', response.status);
+      toast.success(
+        language === 'ar' 
+          ? '🎉 تم التسجيل بنجاح!' 
+          : '🎉 Registration successful!'
+      );
+      
+      // ⚡ التحويل المباشر لصفحة التحقق
+      navigate('/verify-email', { 
+        state: { email: formData.email }
+      });
 
-      // ⭐ التحقق بطرق متعددة (أكثر مرونة)
-      if (response.data.success || response.status === 200 || response.status === 201) {
-        toast.success(
-          language === 'ar' 
-            ? '🎉 تم التسجيل بنجاح! تحقق من بريدك الإلكتروني' 
-            : '🎉 Registration successful! Check your email'
-        );
-        
-        // ⭐ انتظار قصير قبل التحويل للتأكد من ظهور الـ toast
-        setTimeout(() => {
-          console.log('🔄 Navigating to verify-email page...');
-          navigate('/verify-email', { 
-            state: { email: formData.email },
-            replace: true 
-          });
-        }, 1500);
-      } else {
-        // في حالة عدم وجود success flag
-        throw new Error('Unexpected response format');
-      }
     } catch (error) {
-      console.error('❌ Register error:', error);
-      console.error('📋 Error response:', error.response?.data);
-      console.error('🔢 Error status:', error.response?.status);
+      console.error('Register error:', error);
       
       toast.error(
         error.response?.data?.message || 

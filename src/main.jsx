@@ -9,19 +9,19 @@ import './index.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <AuthProvider>
-        <LanguageProvider>
-          <ThemeProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <ThemeProvider>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
             <App />
-          </ThemeProvider>
-        </LanguageProvider>
-      </AuthProvider>
-    </BrowserRouter>
+          </BrowserRouter>
+        </ThemeProvider>
+      </LanguageProvider>
+    </AuthProvider>
   </StrictMode>
 );
